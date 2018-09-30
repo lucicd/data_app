@@ -1,56 +1,11 @@
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize(
-	'demo',
-	'postgres',
-	'Huntsman2017', {
-	host: '127.0.0.1',
-	dialect: 'postgres',
-	operatorsAliases: false,
-	pool: {
-		max: 5,
-		min: 0,
-		acquire: 3000,
-		idel: 1000,
-	},
-});
+const promise = require('bluebird');
 
-const User = sequelize.define('user', {
-	username: {type: Sequelize.STRING},
-	password: {type: Sequelize.STRING},
-});
+const options = {
+  promiseLib: promise,
+};
 
-function connect(callback) {
-	sequelize.authenticate().then(function() {
-		console.log('Connection has been established successfully');
-		callback();
-	}).catch(function(err) {
-		console.error('Unable to connect to the database:' + err);
-	});
-}
+const pgp = require('pg-promise')(options);
+const connectionString = 'postgres://postgres:Huntsman2017@127.0.0.1:5432/demo';
+const db = pgp(connectionString);
 
-
-function createTables(callback) {
-	
-	User.sync({force: true}).then(callback);
-}
-
-function createUsers(callback) {
-	User.create({
-		username: 'joe',
-		password: 'secret',
-	}).then(callback);
-}
-
-function queryUsers(callback) {
-	User.findAll().then(callback);	
-}
-
-connect(function() {
-	createTables(function() {
-		createUsers(function() {
-			queryUsers(function(users) {
-				console.log(users);
-			});
-		});
-	});
-});
+module.exports = db;
