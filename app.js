@@ -1,8 +1,32 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const sessionSecret = require('./secrets');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const passport = require('passport');
+const bcrypt = require('bcryptjs');
+const LocalStrategy = require('passport-local').Strategy;
+const userModel = require('./models/user-model');
+
+passport.use(new LocalStrategy((username, password, done) => {
+  userModel.findByName(username, (err, user) => {
+    if (err) { return done(err); }
+    if (!user) {
+      return done(null, false, { message: 'Incorrect username.' });
+    }
+    bcrypt.compare(password, user.password, (err, isValid) => {
+      if (err) { return done(err); } 
+      if (!isValid) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    });
+  });
+}));
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -17,6 +41,12 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({
+  secret: sessionSecret,
+  cookie: {maxAge: 60000},
+  resave: false,
+  saveUninitialized: false,
+}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 //Helmet can help protect your app from some well-known web vulnerabilities
