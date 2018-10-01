@@ -1,8 +1,28 @@
 const db = require('../connection');
 const bcrypt = require('bcryptjs');
 
-function getAll(callback) {
-  db.any('SELECT username FROM users')
+function count(callback, search) {
+  let sql='SELECT COUNT(*) FROM users';
+  if (search) {
+    sql += ' WHERE username ILIKE $1 OR email ILIKE $1 OR role ILIKE $1';
+  }
+  db.one(sql, ['%'+search+'%'])
+    .then(data => {
+      callback(null, data);
+    })
+    .catch(err => {
+      callback(err);
+    });
+}
+
+function getPaginated(callback, pageNo, pageSize, search) {
+  const offset = (pageNo - 1) * pageSize;
+  let sql = 'SELECT id, username, email, role FROM users';
+  if (search) {
+    sql += ' WHERE username ILIKE $1 OR email ILIKE $1 OR role ILIKE $1';
+  }
+  sql += ' ORDER BY id LIMIT $2 OFFSET $3';
+  db.any(sql, ['%'+search+'%', pageSize, offset])
     .then(data => {
       callback(null, data);
     })
@@ -43,7 +63,8 @@ function add(user, callback) {
 }
 
 module.exports = {
-  getAll: getAll,
+  getPaginated: getPaginated,
   getByName: getByName,
   add: add,
+  count: count,
 };

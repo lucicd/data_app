@@ -1,0 +1,24 @@
+<form action="<%= action %>" method="get">
+  Search: <input type="text" name="search" value="<%= search %>" onchange="this.form.submit()">
+  
+  <button type="button" onclick="document.getElementById('pageno').value=1; this.form.submit();">First</button>
+  
+  <button type="button" onclick="document.getElementById('pageno').value=<%= Math.max(pageNo - 1, 1) %>; this.form.submit();">Prev</button>
+  Page: <input type="number" min="1" max="<%= totalPages%>" step="1" id="pageno" name="pageno" value="<%= pageNo %>" onchange="this.form.submit();">
+  
+  <span> of <%= totalPages %></span>
+  
+  <button type="button" onclick="document.getElementById('pageno').value=<%= Math.min(pageNo + 1, totalPages) %>; this.form.submit();">Next</button>
+  
+  <button type="button" onclick="document.getElementById('pageno').value=<%= totalPages %>; this.form.submit();">Last</button>
+
+  Page Size:
+  <select name="pagesize" value="<%= pageSize %>" onchange="this.form.submit()">
+    <option value="10" <%= pageSize == 10 ? 'selected' : ''%>>10</option>
+    <option value="20" <%= pageSize == 20 ? 'selected' : ''%>>20</option>
+    <option value="50" <%= pageSize == 50 ? 'selected' : ''%>>50</option>
+    <option value="100" <%= pageSize == 100 ? 'selected' : ''%>>100</option>
+  </select>
+  
+  <input type="submit" value="Refresh">
+</form>
