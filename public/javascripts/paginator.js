@@ -44,6 +44,8 @@
     uri += '?search=' + encodeURI(paginatorState.search);
     uri += '&pageno=' + encodeURI(paginatorState.pageNo);
     uri += '&pagesize=' + encodeURI(paginatorState.pageSize);
+    uri += '&orderby=' + encodeURI(paginatorState.orderBy);
+    uri += '&orderdir=' + encodeURI(paginatorState.orderDir);
 
     xhttp.open('GET', uri, true);
     xhttp.send();
@@ -106,10 +108,33 @@
     });
   }
 
+  var orderBySelect = document.getElementById('orderBySelect');
+  orderBySelect.onchange = function() {
+    var sortableColumn = paginatorState.sortableColumns[orderBySelect.value];
+    paginatorState.orderBy = sortableColumn.column;
+    paginatorState.orderDir = sortableColumn.direction;
+    getData(function() {
+      console.log(paginatorState);
+    });
+  }
+
   app.startPaginator = function(config, callback) {
     paginatorState.tableId = config.tableId;
     paginatorState.createTableRow = config.createTableRow;
     paginatorState.uri = config.uri;
+    if (config.sortableColumns) {
+      paginatorState.sortableColumns = config.sortableColumns;
+      paginatorState.orderBy = config.sortableColumns[0].column;
+      paginatorState.orderDir = config.sortableColumns[0].direction;
+      var orderBySelect = document.getElementById('orderBySelect');
+      for (var i = 0; i < config.sortableColumns.length; i++) {
+        var sortableColumn = config.sortableColumns[i];
+        var option = document.createElement('option');
+        option.innerHTML = sortableColumn.name + ' ' + sortableColumn.direction;
+        option.setAttribute('value', i);
+        orderBySelect.appendChild(option);
+      }
+    }
     getData(callback);
   };
 })();

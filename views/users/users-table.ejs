@@ -51,6 +51,16 @@
         tableId: 'dataTable',
         createTableRow: createTableRow,
         uri: '/users/data',
+        sortableColumns: [
+          { name: 'User Name', column: 'username', direction: 'ASC' },
+          { name: 'User Name', column: 'username', direction: 'DESC' },
+          { name: 'Email', column: 'email', direction: 'ASC' },
+          { name: 'Email', column: 'email', direction: 'DESC' },
+          { name: 'Role', column: 'role', direction: 'ASC' },
+          { name: 'Role', column: 'role', direction: 'DESC' },
+          { name: 'ID', column: 'id', direction: 'ASC' },
+          { name: 'ID', column: 'id', direction: 'DESC' },
+        ],
       };
 
       app.startPaginator(paginatorConfig, function() {

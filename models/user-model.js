@@ -2,27 +2,35 @@ const db = require('../connection');
 const bcrypt = require('bcryptjs');
 
 function count(callback, search) {
-  let sql='SELECT COUNT(*) FROM users';
+  let sql='SELECT COUNT(*) AS count FROM users';
   if (search) {
     sql += ' WHERE username ILIKE $1 OR email ILIKE $1 OR role ILIKE $1';
   }
   db.one(sql, ['%'+search+'%'])
     .then(data => {
-      callback(null, data);
+      callback(null, parseInt(data.count));
     })
     .catch(err => {
       callback(err);
     });
 }
 
-function getPaginated(callback, pageNo, pageSize, search) {
+function getPaginated(callback, pageNo, pageSize, search, orderBy, orderDir) {
   const offset = (pageNo - 1) * pageSize;
   let sql = 'SELECT id, username, email, role FROM users';
   if (search) {
     sql += ' WHERE username ILIKE $1 OR email ILIKE $1 OR role ILIKE $1';
   }
-  sql += ' ORDER BY id LIMIT $2 OFFSET $3';
-  db.any(sql, ['%'+search+'%', pageSize, offset])
+  if (orderBy) {
+    sql += ' ORDER BY $4~ ';
+    if (orderDir && (orderDir.toUpperCase() === 'ASC' || orderDir.toUpperCase() === 'DESC')) {
+      sql += ' ' + orderDir.toUpperCase();
+    }
+  } else {
+    sql += ' ORDER BY username ASC';
+  }
+  sql += ' LIMIT $2 OFFSET $3';
+  db.any(sql, ['%'+search+'%', pageSize, offset, orderBy])
     .then(data => {
       callback(null, data);
     })

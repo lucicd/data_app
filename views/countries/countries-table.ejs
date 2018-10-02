@@ -46,6 +46,14 @@
         tableId: 'dataTable',
         createTableRow: createTableRow,
         uri: '/countries/data',
+        sortableColumns: [
+          { name: 'Code', column: 'code', direction: 'ASC' },
+          { name: 'Code', column: 'code', direction: 'DESC' },
+          { name: 'Name', column: 'name', direction: 'ASC' },
+          { name: 'Name', column: 'name', direction: 'DESC' },
+          { name: 'ID', column: 'id', direction: 'ASC' },
+          { name: 'ID', column: 'id', direction: 'DESC' },
+        ],
       };
 
       app.startPaginator(paginatorConfig, function() {

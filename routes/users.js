@@ -10,10 +10,12 @@ router.get('/', (req, res, next) => {
 });
 
 router.get('/data', (req, res, next) => {
-  let pageNo = req.query.pageno || 1;
+  let pageNo = parseInt(req.query.pageno || 1);
   if (pageNo <= 0) pageNo = 1;
-  const pageSize = req.query.pagesize || 10;
+  const pageSize = parseInt(req.query.pagesize || 10);
   const search = req.query.search;
+  const orderBy = req.query.orderby;
+  const orderDir = req.query.orderdir;
   userModel.getPaginated((err, users) => {
     if (err) {
       next(err);
@@ -25,16 +27,18 @@ router.get('/data', (req, res, next) => {
           const params = {
             search: search,
             rows: users, 
-            count: parseInt(count.count),
-            pageNo: parseInt(pageNo),
-            pageSize: parseInt(pageSize),
-            totalPages: Math.ceil(count.count / pageSize),
+            count: count,
+            pageNo: pageNo,
+            pageSize: pageSize,
+            orderBy: orderBy,
+            orderDir: orderDir,
+            totalPages: Math.ceil(count / pageSize),
           };
           res.status(200).json(params);
         }
       }, search);
     }
-  }, pageNo, pageSize, search);
+  }, pageNo, pageSize, search, orderBy, orderDir);
 
 });
 
