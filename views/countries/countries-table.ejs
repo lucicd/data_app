@@ -6,14 +6,13 @@
 </head>
 <body>
   <h1><%= title %></h1>
-  <%- include('../paginator'); %>
+  <%- include('../paginator') %>
   <table>
     <thead>
       <tr>
         <th>ID</th>
-        <th>User Name</th>
-        <th>Email</th>
-        <th>Role</th>
+        <th>Code</th>
+        <th>Name</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -22,23 +21,19 @@
   <script src="javascripts/paginator.js"></script>
   <script>
     (function(app) {
-      function createTableRow(user) {
+      function createTableRow(country) {
         var tr = document.createElement('tr');
 
         var td = document.createElement('td')
-        td.innerHTML = user.id;
+        td.innerHTML = country.id;
         tr.appendChild(td);
 
         td = document.createElement('td')
-        td.innerHTML = user.username;
+        td.innerHTML = country.code;
         tr.appendChild(td);
 
         td = document.createElement('td')
-        td.innerHTML = user.email;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = user.role;
+        td.innerHTML = country.name;
         tr.appendChild(td);
 
         td = document.createElement('td')
@@ -50,7 +45,7 @@
       var paginatorConfig = {
         tableId: 'dataTable',
         createTableRow: createTableRow,
-        uri: '/users/data',
+        uri: '/countries/data',
       };
 
       app.startPaginator(paginatorConfig, function() {

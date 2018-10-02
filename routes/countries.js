@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const userModel = require('../models/user-model');
+const countryModel = require('../models/country-model');
 
 router.get('/', (req, res, next) => {
   const renderParams = {
-    title: 'Users', 
+    title: 'Countries', 
   };
-  res.render('users/users-table', renderParams);
+  res.render('countries/countries-table', renderParams);
 });
 
 router.get('/data', (req, res, next) => {
@@ -14,17 +14,17 @@ router.get('/data', (req, res, next) => {
   if (pageNo <= 0) pageNo = 1;
   const pageSize = req.query.pagesize || 10;
   const search = req.query.search;
-  userModel.getPaginated((err, users) => {
+  countryModel.getPaginated((err, countries) => {
     if (err) {
       next(err);
     } else {
-      userModel.count((err, count) => {
+      countryModel.count((err, count) => {
         if (err) {
           next(err);
         } else {
           const params = {
             search: search,
-            rows: users, 
+            rows: countries, 
             count: parseInt(count.count),
             pageNo: parseInt(pageNo),
             pageSize: parseInt(pageSize),
@@ -35,7 +35,6 @@ router.get('/data', (req, res, next) => {
       }, search);
     }
   }, pageNo, pageSize, search);
-
 });
 
 router.post('/', (req, res, next) => {
@@ -43,7 +42,7 @@ router.post('/', (req, res, next) => {
     username: req.body.username,
     password: req.body.password,
   };
-  userModel.add(user, (err) => {
+  countryModel.add(user, (err) => {
     if (err) {
       next(err);
     } else {

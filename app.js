@@ -30,6 +30,7 @@ passport.use(new LocalStrategy((username, password, done) => {
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const countriesRouter = require('./routes/countries');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use(helmet());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/countries', countriesRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
