@@ -1,23 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title><%= title %></title>
-</head>
+<%- include('../head') %>
 <body>
-  <h1><%= title %></h1>
-  <%- include('../paginator') %>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Code</th>
-        <th>Name</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="dataTable"></tbody>
-  </table>
+  <div class="container">
+    <h1><%= title %></h1>
+  </div>
+  <div class="container">
+    <a href="/countries/add" class="btn btn-primary">Add</a>
+  </div>
+  <div class="container">
+    <%- include('../paginator') %>
+    <table class="table table-striped table-hoover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="dataTable"></tbody>
+    </table>
+  </div>
   <script src="javascripts/paginator.js"></script>
   <script>
     (function(app) {
@@ -36,8 +38,19 @@
         td.innerHTML = country.name;
         tr.appendChild(td);
 
+        var editA = document.createElement('a');
+        editA.innerHTML = 'Edit';
+        editA.setAttribute('href', '/countries/edit?id=' + encodeURI(country.id));
+        editA.setAttribute('class', 'btn btn-secondary btn-sm');
+
+        var deleteA = document.createElement('a');
+        deleteA.innerHTML = 'Delete';
+        deleteA.setAttribute('href', '/countries/delete?id=' + encodeURI(country.id));
+        deleteA.setAttribute('class', 'btn btn-danger btn-sm');
+
         td = document.createElement('td')
-        td.innerHTML = 'Edit Delete';
+        td.appendChild(editA)
+        td.appendChild(deleteA)
         tr.appendChild(td);
         return tr;
       }
@@ -62,4 +75,4 @@
     })(window.APP);
   </script>
 </body>
-</html>
+<%- include('../footer') %>
