@@ -1,72 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title><%= title %></title>
-</head>
+<%- include('../head-no-bootstrap') %>
 <body>
   <h1><%= title %></h1>
-  <%- include('../paginator'); %>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>User Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="dataTable"></tbody>
-  </table>
-  <script src="javascripts/paginator.js"></script>
-  <script>
-    (function(app) {
-      function createTableRow(user) {
-        var tr = document.createElement('tr');
-
-        var td = document.createElement('td')
-        td.innerHTML = user.id;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = user.username;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = user.email;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = user.role;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = 'Edit Delete';
-        tr.appendChild(td);
-        return tr;
-      }
-
-      var paginatorConfig = {
-        tableId: 'dataTable',
-        createTableRow: createTableRow,
-        uri: '/users/data',
-        sortableColumns: [
-          { name: 'User Name', column: 'username', direction: 'ASC' },
-          { name: 'User Name', column: 'username', direction: 'DESC' },
-          { name: 'Email', column: 'email', direction: 'ASC' },
-          { name: 'Email', column: 'email', direction: 'DESC' },
-          { name: 'Role', column: 'role', direction: 'ASC' },
-          { name: 'Role', column: 'role', direction: 'DESC' },
-          { name: 'ID', column: 'id', direction: 'ASC' },
-          { name: 'ID', column: 'id', direction: 'DESC' },
-        ],
-      };
-
-      app.startPaginator(paginatorConfig, function() {
-        console.log('Paginator started.');
-      });
-    })(window.APP);
-  </script>
+  <div id="myGrid" style="height: 450px"></div>
 </body>
-</html>
+<script src="/javascripts/jquery.js"></script>
+<script src="/javascripts/w2ui.js"></script>
+<script>
+  (function() {
+    function setGrid() {
+      $('#myGrid').w2grid({
+        name: 'myGrid',
+        header: 'Users',
+        recid: 'id',
+        method: 'post',
+        url: 'users/get-records',
+        limit: 10,
+        show : { 
+          toolbar : true ,
+          footer: true,
+          toolbarAdd: true,
+          toolbarDelete: true,
+          toolbarSave: true,
+          toolbarEdit: true,
+        },
+        columns: [
+          { field: 'id', caption: 'ID', size: '10%', sortable: true},
+          { field: 'username', caption: 'User Name', size: '30%', sortable: true},
+          { field: 'email', caption: 'Email', size: '50%', sortable: true},
+          { field: 'role', caption: 'Role', size: '10%', sortable: true},
+        ],
+        searches: [
+          { field: "id", type: "int", caption: "ID" },
+          { field: "username", type: "text", caption: "User Name" },
+          { field: "email", type: "text", caption: "Email" },
+          { field: "role", type: "text", caption: "Role" },
+        ],
+        sortData: [
+          { field: 'id', direction: 'asc' },
+          { field: 'username', direction: 'asc' },
+          { field: 'email', direction: 'asc' },
+          { field: 'role', direction: 'asc' },
+        ],
+        onAdd: function(event) {
+          w2alert('add');
+        },
+        onEdit: function(event) {
+          w2alert('edit');
+        },
+        onDelete: function(event) {
+          console.log('delete has default behavior');
+        },
+        onSave: function(event) {
+          w2alert('save');
+        },
+      });
+    }
+    setGrid();
+  })();
+</script>
+<%- include('../footer-no-bootstrap') %>

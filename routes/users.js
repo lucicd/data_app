@@ -56,4 +56,21 @@ router.post('/', (req, res, next) => {
   })
 });
 
+router.post('/get-records', (req, res, next) => {
+  userModel.getRecords(JSON.parse(req.body.request), (err, users) => {
+    if (err) {
+      res.status(200).json({
+        status: 'error',
+        message: JSON.stringify(err),
+      });
+    } else {
+      res.status(200).json({
+        status: 'success',
+        total: users.length,
+        records: users,
+      });
+    }
+  });
+});
+
 module.exports = router;

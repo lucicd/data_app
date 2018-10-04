@@ -1,6 +1,49 @@
 const db = require('../connection');
 const bcrypt = require('bcryptjs');
 
+function buildQuery(params, callback) {
+  let sql = 'SELECT id, username, email, role FROM users';
+  var namedParams = {};
+  
+  if (params.sort && params.sort.length > 0) {
+    sql += ' ORDER BY $/sort_field0:name/';
+    namedParams['sort_field0'] =  params.sort[0].field;
+    if (params.sort[0].direction === 'asc' || params.sort[0].direction === 'desc') {
+      sql += ' ' + params.sort[0].direction.toUpperCase();
+    }
+    for (let i = 1; i < params.sort.length; i++) {
+      sql += ', $/sort_field' + i + ':name/';
+      namedParams['sort_field' + i] =  params.sort[i].field;
+      if (params.sort[i].direction === 'asc' || params.sort[i].direction === 'desc') {
+        sql += ' ' + params.sort[i].direction.toUpperCase();
+      }
+    }
+  }
+
+  if (params.limit) {
+    sql += ' LIMIT $/limit/';
+    namedParams.limit = params.limit;
+  }
+  if (params.offset) {
+    sql += ' OFFSET $/offset/';
+    namedParams.offset = params.offset;
+  }
+  callback(sql, namedParams);
+}
+
+function getRecords(params, callback) {
+  console.log(params);
+  let sql = buildQuery(params, (sql, namedParams) => {
+    db.any(sql, namedParams)
+      .then(data => {
+        callback(null, data);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  });
+}
+
 function count(callback, search) {
   let sql='SELECT COUNT(*) AS count FROM users';
   if (search) {
@@ -73,6 +116,7 @@ function add(user, callback) {
 module.exports = {
   getPaginated: getPaginated,
   getByName: getByName,
+  getRecords: getRecords,
   add: add,
   count: count,
 };
