@@ -1,72 +1,112 @@
-function buildWhereClause(bodyParams, callback) {
+function buildWhereClause(requestParams, callback) {
   const clauseParams = {};
   let clause = '';
-  if (bodyParams.search && bodyParams.search.length > 0) {
+  if (requestParams.search && requestParams.search.length > 0) {
     clause = 'WHERE';
-    for (let i = 0; i < bodyParams.search.length; i++) {
+    for (let i = 0; i < requestParams.search.length; i++) {
       if (i > 0) {
-        if (bodyParams.searchLogic) {
-          clause += ' ' + bodyParams.searchLogic;
+        if (requestParams.searchLogic) {
+          clause += ' ' + requestParams.searchLogic;
         } else {
           clause += ' OR';
         }
       }
-      const searchField = bodyParams.search[i];
+      const searchField = requestParams.search[i];
       if (searchField.type === 'text') {
         if (searchField.operator === 'begins') {
           clause += ' $/searchFieldName' + i + 
             ':name/ ILIKE $/searchFieldValue' + i + '/';
           clauseParams['searchFieldName' + i] = searchField.field;
           clauseParams['searchFieldValue' + i] = searchField.value + '%';
-        } else {
+        } else if (searchField.operator === 'ends') {
+          clause += ' $/searchFieldName' + i + 
+            ':name/ ILIKE $/searchFieldValue' + i + '/';
+          clauseParams['searchFieldName' + i] = searchField.field;
+          clauseParams['searchFieldValue' + i] = '%' + searchField.value;
+        } else if (searchField.operator === 'contains') {
+          clause += ' $/searchFieldName' + i + 
+            ':name/ ILIKE $/searchFieldValue' + i + '/';
+          clauseParams['searchFieldName' + i] = searchField.field;
+          clauseParams['searchFieldValue' + i] = '%' + searchField.value + '%';
+        } else if (searchField.operator === 'is') {
           clause += ' $/searchFieldName' + i + 
             ':name/ = $/searchFieldValue' + i + '/';
           clauseParams['searchFieldName' + i] = searchField.field;
           clauseParams['searchFieldValue' + i] = searchField.value;
+        } else {
+          throw('Unknow text search operator: ' + searchField.operator);
         }
+      } else if (searchField.type === 'int') {
+        if (searchField.operator === 'is') {
+          clause += ' $/searchFieldName' + i + 
+            ':name/ = $/searchFieldValue' + i + '/';
+          clauseParams['searchFieldName' + i] = searchField.field;
+          clauseParams['searchFieldValue' + i] = searchField.value;
+        } else if (searchField.operator === 'between') {
+          clause += ' ($/searchFieldName' + i + 
+            ':name/ BETWEEN $/searchFieldValue' + i + 'A/ ' +
+            'AND $/searchFieldValue' + i + 'B/)';
+          clauseParams['searchFieldName' + i] = searchField.field;
+          clauseParams['searchFieldValue' + i + 'A'] = searchField.value[0];
+          clauseParams['searchFieldValue' + i + 'B'] = searchField.value[1];
+        } else if (searchField.operator === 'less') {
+          clause += ' $/searchFieldName' + i + 
+            ':name/ < $/searchFieldValue' + i + '/';
+          clauseParams['searchFieldName' + i] = searchField.field;
+          clauseParams['searchFieldValue' + i] = searchField.value;
+        } else if (searchField.operator === 'more') {
+          clause += ' $/searchFieldName' + i + 
+            ':name/ > $/searchFieldValue' + i + '/';
+          clauseParams['searchFieldName' + i] = searchField.field;
+          clauseParams['searchFieldValue' + i] = searchField.value;
+        } else {
+          throw('Unknow int search operator: ' + searchField.operator);
+        }
+      } else {
+        throw('Unknow search field type: ' + searchField.type);
       }
     }
   }
   callback(clause, clauseParams);   
 }
 
-function buildOrderByClause(bodyParams, callback) {
+function buildOrderByClause(requestParams, callback) {
   let clause = '';
   const clauseParams = {};
 
-  if (bodyParams.sort && bodyParams.sort.length > 0) {
+  if (requestParams.sort && requestParams.sort.length > 0) {
     clause += 'ORDER BY $/sortField0:name/';
-    clauseParams['sortField0'] = bodyParams.sort[0].field;
+    clauseParams['sortField0'] = requestParams.sort[0].field;
 
-    if (bodyParams.sort[0].direction.toUpperCase() === 'ASC' || 
-    bodyParams.sort[0].direction.toUpperCase() === 'DESC') {
-      clause += ' ' + bodyParams.sort[0].direction.toUpperCase();
+    if (requestParams.sort[0].direction.toUpperCase() === 'ASC' || 
+    requestParams.sort[0].direction.toUpperCase() === 'DESC') {
+      clause += ' ' + requestParams.sort[0].direction.toUpperCase();
     }
 
-    for (let i = 1; i < bodyParams.sort.length; i++) {
+    for (let i = 1; i < requestParams.sort.length; i++) {
       clause += ', $/sortField' + i + ':name/';
-      clauseParams['sortField' + i] = bodyParams.sort[i].field;
-      if (bodyParams.sort[i].direction.toUpperCase() === 'ASC' ||
-      bodyParams.sort[i].direction.toUpperCase() === 'DESC') {
-        clause += ' ' + bodyParams.sort[i].direction.toUpperCase();
+      clauseParams['sortField' + i] = requestParams.sort[i].field;
+      if (requestParams.sort[i].direction.toUpperCase() === 'ASC' ||
+      requestParams.sort[i].direction.toUpperCase() === 'DESC') {
+        clause += ' ' + requestParams.sort[i].direction.toUpperCase();
       }
     }
   }
   callback(clause, clauseParams);
 }
 
-function buildLimitClause(bodyParams, callback) {
+function buildLimitClause(requestParams, callback) {
   let clause = '';
   let clauseParams = {};
 
-  if (bodyParams.limit) {
+  if (requestParams.limit) {
     clause += 'LIMIT $/limit/';
-    clauseParams.limit = bodyParams.limit;
+    clauseParams.limit = requestParams.limit;
   }
 
-  if (bodyParams.offset) {
+  if (requestParams.offset) {
     clause += ' OFFSET $/offset/';
-    clauseParams.offset = bodyParams.offset;
+    clauseParams.offset = requestParams.offset;
   } else {
     clause += ' OFFSET 0';
   }
