@@ -1,3 +1,5 @@
+const pgp = require('pg-promise')();
+
 function buildWhereClause(requestParams, callback) {
   const clauseParams = {};
   let clause = '';
@@ -114,8 +116,82 @@ function buildLimitClause(requestParams, callback) {
   callback(clause, clauseParams);  
 }
 
+function buildUpdateQuery(table, params, callback) {
+  const changes = params.changes;
+  if (changes && changes.length > 0) {
+    const queries = [];
+    for (let i = 0; i < changes.length; i++) {
+      const change = changes[i];
+      const queryParts = [];
+      for (const field in change) {
+        if (change.hasOwnProperty(field) && field != 'recid') {
+          queryParts.push(pgp.as.format('$1:name', field) + ' = $/' + field + '/');
+        }
+      }
+      queries.push({
+        query: 'UPDATE ' + table + ' SET ' + queryParts.join(', ') + ' WHERE id = $/recid/',
+        values: change,
+      });
+    }
+    const sql = pgp.helpers.concat(queries);
+    callback(null, sql);
+  } else {
+    callback('There are no changes to save.');
+  }
+}
+
+function buildSearchQuery(table, requestParams, callback) {
+  buildWhereClause(requestParams, (whereClause, whereParams) => {
+    buildOrderByClause(requestParams, (orderByClause, orderByParams) => {
+      buildLimitClause(requestParams, (limitClause, limitParams) => {
+        let sql = table;
+        if (whereClause) {
+          sql += ' ' + whereClause;
+        }
+        if (orderByClause) {
+          sql += ' ' + orderByClause;
+        }
+        if (limitClause) {
+          sql += ' ' + limitClause;
+        }
+        const namedParams = {...whereParams, ...orderByParams, ...limitParams};
+        const cmd = pgp.helpers.concat([{
+          query: sql,
+          values: namedParams,
+        }]);
+        callback(cmd);
+      });
+    });
+  });
+}
+
+function buildCountQuery(table, requestParams, callback) {
+  buildWhereClause(requestParams, (whereClause, whereParams) => {
+    let sql = table;
+    if (whereClause) {
+      sql += ' ' + whereClause;
+    }
+    callback(sql);
+  });
+}
+
+function buildDeleteQuery(table, params, callback) {
+  const selected = params.selected;
+  if (selected && selected.length > 0) {
+    const sql = 'DELETE FROM ' + table + ' WHERE id IN ($1:list)';
+    const cmd = pgp.helpers.concat([{
+      query: sql,
+      values: selected,
+    }]);
+    callback(null, cmd);
+  } else {
+    callback('There are no IDs in the list.');
+  }
+}
+
 module.exports = {
-  buildWhereClause: buildWhereClause,
-  buildOrderByClause: buildOrderByClause,
-  buildLimitClause: buildLimitClause,
+  buildCountQuery: buildCountQuery,
+  buildUpdateQuery: buildUpdateQuery,
+  buildSearchQuery: buildSearchQuery,
+  buildDeleteQuery: buildDeleteQuery,
 };

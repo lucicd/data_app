@@ -13,7 +13,7 @@
         header: 'Users',
         recid: 'id',
         method: 'post',
-        url: 'users/get-records',
+        url: 'users',
         limit: 25,
         show : { 
           toolbar : true ,
@@ -21,13 +21,15 @@
           toolbarAdd: true,
           toolbarDelete: true,
           toolbarSave: true,
-          toolbarEdit: true,
+          toolbarEdit: false,
+          selectColumn: true,
+          multiselect: true,
         },
         columns: [
           { field: 'id', caption: 'ID', size: '10%', sortable: true},
-          { field: 'username', caption: 'User Name', size: '30%', sortable: true},
-          { field: 'email', caption: 'Email', size: '50%', sortable: true},
-          { field: 'role', caption: 'Role', size: '10%', sortable: true},
+          { field: 'username', caption: 'User Name', size: '30%', sortable: true, editable: { type: 'text' }},
+          { field: 'email', caption: 'Email', size: '50%', sortable: true, editable: { type: 'text' }},
+          { field: 'role', caption: 'Role', size: '10%', sortable: true, editable: { type: 'text' }},
         ],
         searches: [
           { field: "id", type: "int", caption: "ID" },
@@ -43,15 +45,6 @@
         ],
         onAdd: function(event) {
           w2alert('add');
-        },
-        onEdit: function(event) {
-          w2alert('edit');
-        },
-        onDelete: function(event) {
-          console.log('delete has default behavior');
-        },
-        onSave: function(event) {
-          w2alert('save');
         },
       });
     }
