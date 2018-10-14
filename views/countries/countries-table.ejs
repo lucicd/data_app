@@ -1,78 +1,52 @@
-<%- include('../head') %>
+<%- include('../head-no-bootstrap') %>
 <body>
-  <div class="container">
-    <h1><%= title %></h1>
-  </div>
-  <div class="container">
-    <a href="/countries/add" class="btn btn-primary">Add</a>
-  </div>
-  <div class="container">
-    <%- include('../paginator') %>
-    <table class="table table-striped table-hoover">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Code</th>
-          <th>Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="dataTable"></tbody>
-    </table>
-  </div>
-  <script src="javascripts/paginator.js"></script>
-  <script>
-    (function(app) {
-      function createTableRow(country) {
-        var tr = document.createElement('tr');
-
-        var td = document.createElement('td')
-        td.innerHTML = country.id;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = country.code;
-        tr.appendChild(td);
-
-        td = document.createElement('td')
-        td.innerHTML = country.name;
-        tr.appendChild(td);
-
-        var editA = document.createElement('a');
-        editA.innerHTML = 'Edit';
-        editA.setAttribute('href', '/countries/edit?id=' + encodeURI(country.id));
-        editA.setAttribute('class', 'btn btn-secondary btn-sm');
-
-        var deleteA = document.createElement('a');
-        deleteA.innerHTML = 'Delete';
-        deleteA.setAttribute('href', '/countries/delete?id=' + encodeURI(country.id));
-        deleteA.setAttribute('class', 'btn btn-danger btn-sm');
-
-        td = document.createElement('td')
-        td.appendChild(editA)
-        td.appendChild(deleteA)
-        tr.appendChild(td);
-        return tr;
-      }
-
-      var paginatorConfig = {
-        tableId: 'dataTable',
-        createTableRow: createTableRow,
-        uri: '/countries/data',
-        sortableColumns: [
-          { name: 'Code', column: 'code', direction: 'ASC' },
-          { name: 'Code', column: 'code', direction: 'DESC' },
-          { name: 'Name', column: 'name', direction: 'ASC' },
-          { name: 'Name', column: 'name', direction: 'DESC' },
-          { name: 'ID', column: 'id', direction: 'ASC' },
-          { name: 'ID', column: 'id', direction: 'DESC' },
-        ],
-      };
-
-      app.startPaginator(paginatorConfig, function() {
-        console.log('Paginator started.');
-      });
-    })(window.APP);
-  </script>
+  <h1><%= title %></h1>
+  <div id="myGrid" style="height: 450px"></div>
 </body>
-<%- include('../footer') %>
+<script src="/javascripts/jquery.js"></script>
+<script src="/javascripts/w2ui.js"></script>
+<script>
+  (function() {
+    function setGrid() {
+      $('#myGrid').w2grid({
+        name: 'myGrid',
+        header: 'Countries',
+        recid: 'id',
+        method: 'post',
+        url: 'countries',
+        limit: 25,
+        show : { 
+          toolbar: true,
+          footer: true,
+          toolbarAdd: true,
+          toolbarDelete: true,
+          toolbarSave: true,
+          toolbarEdit: false,
+          selectColumn: true,
+          multiselect: true,
+        },
+        columns: [
+          { field: 'id', caption: 'ID', size: '10%', sortable: true},
+          { field: 'code', caption: 'Country Code', size: '30%', sortable: true, editable: { type: 'text' }},
+          { field: 'name', caption: 'Country Name', size: '70%', sortable: true, editable: { type: 'text' }},
+        ],
+        searches: [
+          { field: "id", type: "int", caption: "ID" },
+          { field: "code", type: "text", caption: "Country Code" },
+          { field: "name", type: "text", caption: "Country Name" },
+        ],
+        sortData: [
+          { field: 'id', direction: 'asc' },
+          { field: 'code', direction: 'asc' },
+          { field: 'name', direction: 'asc' },
+        ],
+        onAdd: function(event) {
+          console.log(w2ui.myGrid);
+          w2ui.myGrid.add({recid: 0, code: null, name: null}, true);
+        },
+      });
+    }
+    setGrid();
+  })();
+</script>
+<%- include('../footer-no-bootstrap') %>

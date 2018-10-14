@@ -140,6 +140,32 @@ function buildUpdateQuery(table, params, callback) {
   }
 }
 
+function buildInsertQuery(table, params, callback) {
+  const changes = params.changes;
+  if (changes && changes.length > 0) {
+    const queries = [];
+    for (let i = 0; i < changes.length; i++) {
+      const change = changes[i];
+      const fieldsList = [];
+      const valuesList = [];
+      for (const field in change) {
+        if (change.hasOwnProperty(field) && field != 'recid') {
+          fieldsList.push(pgp.as.format('$1:name', field));
+          valuesList.push('$/' + field + '/');
+        }
+      }
+      queries.push({
+        query: 'INSERT INTO ' + table + '(' + fieldsList.join(', ') + ') VALUES(' + valuesList.join(', ') + ')',
+        values: change,
+      });
+    }
+    const sql = pgp.helpers.concat(queries);
+    callback(null, sql);
+  } else {
+    callback('There are no inserts to save.');
+  }
+}
+
 function buildSearchQuery(table, requestParams, callback) {
   buildWhereClause(requestParams, (whereClause, whereParams) => {
     buildOrderByClause(requestParams, (orderByClause, orderByParams) => {
@@ -171,7 +197,11 @@ function buildCountQuery(table, requestParams, callback) {
     if (whereClause) {
       sql += ' ' + whereClause;
     }
-    callback(sql);
+    const cmd = pgp.helpers.concat([{
+      query: sql,
+      values: whereParams,
+    }]);
+    callback(cmd);
   });
 }
 
@@ -192,6 +222,7 @@ function buildDeleteQuery(table, params, callback) {
 module.exports = {
   buildCountQuery: buildCountQuery,
   buildUpdateQuery: buildUpdateQuery,
+  buildInsertQuery: buildInsertQuery,
   buildSearchQuery: buildSearchQuery,
   buildDeleteQuery: buildDeleteQuery,
 };

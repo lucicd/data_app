@@ -14,8 +14,8 @@ ALTER SEQUENCE countries_id_seq
 CREATE TABLE countries
 (
     id integer NOT NULL DEFAULT nextval('countries_id_seq'),
-    code character(2) COLLATE pg_catalog."default",
-    name character varying(255) COLLATE pg_catalog."default",
+    code character(2) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT countries_pkey PRIMARY KEY (id)
 )
 WITH (
@@ -25,6 +25,9 @@ TABLESPACE pg_default;
 
 ALTER TABLE countries
     OWNER to postgres;
+
+CREATE UNIQUE INDEX country_code_uidx ON countries (LOWER(code));
+CREATE UNIQUE INDEX country_name_uidx ON countries (LOWER(name));
 
 INSERT INTO countries(code, name) VALUES('AF', 'Afghanistan');
 INSERT INTO countries(code, name) VALUES('AL', 'Albania');
